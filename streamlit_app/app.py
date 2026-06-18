@@ -407,7 +407,6 @@ def plotly_3d_kernel_mapping(X, y, gamma_val, kernel="rbf"):
         ),
         height=600,
         margin=dict(l=0, r=0, t=40, b=0),
-        legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.8)", bordercolor="gray", borderwidth=1),
     )
     return fig
 
