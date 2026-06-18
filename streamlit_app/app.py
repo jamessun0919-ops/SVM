@@ -367,7 +367,6 @@ def kernel_formula_str(kernel):
 
 def plotly_3d_kernel_mapping(X, y, gamma_val, kernel="rbf"):
     z = compute_kernel_z(X, kernel)
-    fig = go.Figure()
     colors = {0: "blue", 1: "red"}
 
     pad = 0.15
@@ -378,42 +377,45 @@ def plotly_3d_kernel_mapping(X, y, gamma_val, kernel="rbf"):
     xx, yy = np.meshgrid(xs, ys)
     zz_surf = compute_kernel_z(np.column_stack([xx.ravel(), yy.ravel()]), kernel).reshape(xx.shape)
 
-    fig.add_trace(go.Surface(
-        x=xx, y=yy, z=zz_surf,
-        colorscale=[[0, "#FF8C00"], [0.5, "#FFD700"], [1, "#FF8C00"]],
-        opacity=0.3, showscale=False, name="Kernel Surface",
-    ))
-
-    for class_id in [0, 1]:
-        mask = y == class_id
-        fig.add_trace(go.Scatter3d(
-            x=X[mask, 0], y=X[mask, 1], z=z[mask],
-            mode="markers",
-            marker=dict(size=5, color=colors[class_id], opacity=0.9, line=dict(width=0.5, color="black")),
-            name=f"Class {'A' if class_id == 0 else 'B'}",
-        ))
-
     z_mean = z.mean()
     xx_plane, yy_plane = np.meshgrid(
         np.linspace(X[:, 0].min() - x_pad, X[:, 0].max() + x_pad, 20),
         np.linspace(X[:, 1].min() - y_pad, X[:, 1].max() + y_pad, 20),
     )
     zz_plane = np.full_like(xx_plane, z_mean)
-    fig.add_trace(go.Surface(
+
+    data = []
+    data.append(go.Surface(
+        x=xx, y=yy, z=zz_surf,
+        colorscale=[[0, "#FF8C00"], [0.5, "#FFD700"], [1, "#FF8C00"]],
+        opacity=0.3, showscale=False, name="Kernel Surface",
+    ))
+    for class_id in [0, 1]:
+        mask = y == class_id
+        data.append(go.Scatter3d(
+            x=X[mask, 0], y=X[mask, 1], z=z[mask],
+            mode="markers",
+            marker=dict(size=5, color=colors[class_id], opacity=0.9, line=dict(width=0.5, color="black")),
+            name=f"Class {'A' if class_id == 0 else 'B'}",
+        ))
+    data.append(go.Surface(
         x=xx_plane, y=yy_plane, z=zz_plane,
         colorscale=[[0, "green"], [1, "green"]],
         opacity=0.15, showscale=False, name="Hyperplane",
     ))
 
     formula = kernel_formula_str(kernel)
-    fig.update_layout(
-        title=f"Kernel Mapping: {formula} (\u03b3 = {gamma_val})",
-        scene=dict(
-            xaxis_title="X", yaxis_title="Y", zaxis_title="Z",
-            camera=dict(eye=dict(x=1.5, y=1.5, z=0.8)),
+    fig = go.Figure(
+        data=data,
+        layout=go.Layout(
+            title=f"Kernel Mapping: {formula}",
+            scene=dict(
+                xaxis_title="X", yaxis_title="Y", zaxis_title="Z",
+                camera=dict(eye=dict(x=1.5, y=1.5, z=0.8)),
+            ),
+            height=600,
+            margin=dict(l=0, r=0, t=40, b=0),
         ),
-        height=600,
-        margin=dict(l=0, r=0, t=40, b=0),
     )
     return fig
 
