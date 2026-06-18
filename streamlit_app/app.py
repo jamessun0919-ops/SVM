@@ -682,6 +682,11 @@ def page_3d_kernel_demo():
 
     z = compute_kernel_z(X, kernel)
     formula = kernel_formula_str(kernel)
+
+    st.markdown("### 2D → 3D Lift Animation")
+    fig_anim = plotly_kernel_lift_animation(X, y, kernel, z)
+    st.plotly_chart(fig_anim, use_container_width=True)
+
     st.markdown(f"""
     <div class="card">
     <b>{formula}</b><br>
@@ -700,10 +705,6 @@ def page_3d_kernel_demo():
     </ul>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("### 2D → 3D Lift Animation")
-    fig_anim = plotly_kernel_lift_animation(X, y, kernel, z)
-    st.plotly_chart(fig_anim, use_container_width=True)
 
 
 def page_svm_concepts():
