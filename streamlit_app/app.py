@@ -664,20 +664,29 @@ def page_3d_kernel_demo():
     if dataset in ("Iris", "鳶尾花"):
         y = (y > 0).astype(int)
 
+    bg_color = "#1a1a2e"
     col_left, col_right = st.columns(2)
     with col_left:
         st.markdown(f"### {T('demo_2d_title')}")
         fig2d, ax = plt.subplots(figsize=(6, 5))
-        ax.scatter(X[:, 0], X[:, 1], c=y, cmap="bwr", edgecolors="k", s=40)
-        ax.set_title(f"{dataset_en_name(dataset)} (2D)", fontsize=14, fontweight="bold")
-        ax.set_xlabel("Feature 1")
-        ax.set_ylabel("Feature 2")
+        fig2d.patch.set_facecolor(bg_color)
+        ax.set_facecolor(bg_color)
+        ax.scatter(X[:, 0], X[:, 1], c=y, cmap="bwr", edgecolors="w", s=40)
+        ax.set_title(f"{dataset_en_name(dataset)} (2D)", fontsize=14, fontweight="bold", color="white")
+        ax.set_xlabel("Feature 1", color="white")
+        ax.set_ylabel("Feature 2", color="white")
+        ax.tick_params(colors="white")
+        ax.spines["bottom"].set_color("white")
+        ax.spines["left"].set_color("white")
+        ax.spines["top"].set_color("white")
+        ax.spines["right"].set_color("white")
         st.pyplot(fig2d)
         plt.close()
 
     with col_right:
         st.markdown(f"### {T('demo_3d_title')}")
         fig = plotly_3d_kernel_mapping(X, y, gamma, kernel)
+        fig.update_layout(paper_bgcolor=bg_color, scene=dict(bgcolor=bg_color))
         st.plotly_chart(fig, use_container_width=True)
 
     z = compute_kernel_z(X, kernel)
