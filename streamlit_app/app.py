@@ -367,33 +367,43 @@ def plotly_3d_kernel_mapping(X, y, gamma_val, kernel="rbf"):
     z = compute_kernel_z(X, kernel)
     fig = go.Figure()
     colors = {0: "blue", 1: "red"}
+
+    x_pad = (X[:, 0].max() - X[:, 0].min()) * 0.15
+    y_pad = (X[:, 1].max() - X[:, 1].min()) * 0.15
+    x_range = np.linspace(X[:, 0].min() - x_pad, X[:, 0].max() + x_pad, 30)
+    y_range = np.linspace(X[:, 1].min() - y_pad, X[:, 1].max() + y_pad, 30)
+    xx, yy = np.meshgrid(x_range, y_range)
+    zz_surface = compute_kernel_z(np.column_stack([xx.ravel(), yy.ravel()]), kernel).reshape(xx.shape)
+
+    fig.add_trace(go.Surface(
+        x=xx, y=yy, z=zz_surface,
+        colorscale=[[0, "#FF8C00"], [0.5, "#FFD700"], [1, "#FF8C00"]],
+        opacity=0.35, showscale=False, name="Kernel Surface",
+    ))
+
     for class_id in [0, 1]:
         mask = y == class_id
         fig.add_trace(go.Scatter3d(
             x=X[mask, 0], y=X[mask, 1], z=z[mask],
             mode="markers",
-            marker=dict(size=4, color=colors[class_id], opacity=0.8),
+            marker=dict(size=5, color=colors[class_id], opacity=0.9, line=dict(width=0.5, color="black")),
             name=f"Class {'A' if class_id == 0 else 'B'}",
         ))
 
-    x_range = np.linspace(X[:, 0].min(), X[:, 0].max(), 20)
-    y_range = np.linspace(X[:, 1].min(), X[:, 1].max(), 20)
-    xx, yy = np.meshgrid(x_range, y_range)
-
     z_mean = z.mean()
-    zz = np.full_like(xx, z_mean)
+    zz_plane = np.full_like(xx, z_mean)
     fig.add_trace(go.Surface(
-        x=xx, y=yy, z=zz,
+        x=xx, y=yy, z=zz_plane,
         colorscale=[[0, "green"], [1, "green"]],
-        opacity=0.2, showscale=False, name="Hyperplane",
+        opacity=0.15, showscale=False, name="Hyperplane",
     ))
 
     formula = kernel_formula_str(kernel)
     fig.update_layout(
-        title=f"Kernel Mapping: {formula} (\u03b3 = {gamma_val})",
+        title=f"Kernel Mapping: {formula}",
         scene=dict(
             xaxis_title="X", yaxis_title="Y", zaxis_title="Z",
-            camera=dict(eye=dict(x=1.5, y=1.5, z=0.8)),
+            camera=dict(eye=dict(x=1.8, y=1.8, z=0.8)),
         ),
         height=600,
         margin=dict(l=0, r=0, t=40, b=0),
