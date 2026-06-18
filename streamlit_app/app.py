@@ -551,11 +551,8 @@ def page_3d_kernel_demo():
     if dataset in ("Iris", "鳶尾花"):
         y = (y > 0).astype(int)
 
-    fig = plotly_3d_kernel_mapping(X, y, gamma, kernel)
-    st.plotly_chart(fig, use_container_width=True)
-
-    col1, col2 = st.columns(2)
-    with col1:
+    col_left, col_right = st.columns(2)
+    with col_left:
         st.markdown(f"### {T('demo_2d_title')}")
         fig2d, ax = plt.subplots(figsize=(6, 5))
         ax.scatter(X[:, 0], X[:, 1], c=y, cmap="bwr", edgecolors="k", s=40)
@@ -565,28 +562,31 @@ def page_3d_kernel_demo():
         st.pyplot(fig2d)
         plt.close()
 
-    with col2:
-        z = compute_kernel_z(X, kernel)
-        formula = kernel_formula_str(kernel)
+    with col_right:
         st.markdown(f"### {T('demo_3d_title')}")
-        st.markdown(f"""
-        <div class="card">
-        <b>{formula}</b><br>
-        {T("demo_3d_desc")}
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown(f"""
-        <div class="card">
-        <h4>{T("demo_learn_title")}</h4>
-        <ul>
-            <li>{T("demo_learn1")}</li>
-            <li>{T("demo_learn2")}</li>
-            <li>{T("demo_learn3")}</li>
-            <li>{T("demo_learn4")}</li>
-            <li>{T("demo_learn5")}</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        fig = plotly_3d_kernel_mapping(X, y, gamma, kernel)
+        st.plotly_chart(fig, use_container_width=True)
+
+    z = compute_kernel_z(X, kernel)
+    formula = kernel_formula_str(kernel)
+    st.markdown(f"""
+    <div class="card">
+    <b>{formula}</b><br>
+    {T("demo_3d_desc")}
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="card">
+    <h4>{T("demo_learn_title")}</h4>
+    <ul>
+        <li>{T("demo_learn1")}</li>
+        <li>{T("demo_learn2")}</li>
+        <li>{T("demo_learn3")}</li>
+        <li>{T("demo_learn4")}</li>
+        <li>{T("demo_learn5")}</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def page_svm_concepts():
