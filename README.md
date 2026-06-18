@@ -1,6 +1,7 @@
 # SVM Kernel 3D Visualization Platform
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://svm3dnchuai.streamlit.app/)
+[![Main App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://svm3dnchuai.streamlit.app/)
+[![Demo Live](https://img.shields.io/badge/▶_Demo_Live-svmdemo0919-blue?style=for-the-badge&logo=streamlit)](https://svmdemo0919.streamlit.app/)
 
 An interactive educational platform demonstrating how Support Vector Machines use Kernel Functions to transform non-linearly separable data into higher-dimensional feature spaces where linear separation becomes possible.
 
@@ -25,7 +26,10 @@ SVM_Kernel_3D_Visualization_Platform/
 
 ## Live Demo
 
-Try it now: [https://svm3dnchuai.streamlit.app/](https://svm3dnchuai.streamlit.app/)
+| Platform | Link |
+|----------|------|
+| ✅ Main App | [![Main App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://svm3dnchuai.streamlit.app/) |
+| 🚀 Demo Live | [![Demo Live](https://img.shields.io/badge/▶_Demo_Live-svmdemo0919-blue?style=for-the-badge&logo=streamlit)](https://svmdemo0919.streamlit.app/) |
 
 ## Quick Start
 
