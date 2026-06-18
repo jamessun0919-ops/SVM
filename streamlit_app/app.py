@@ -1,6 +1,8 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import io
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn.datasets import make_circles, make_moons, load_iris
@@ -668,20 +670,23 @@ def page_3d_kernel_demo():
     col_left, col_right = st.columns(2)
     with col_left:
         st.markdown(f"### {T('demo_2d_title')}")
-        with plt.style.context("dark_background"):
-            fig2d, ax = plt.subplots(figsize=(6, 5))
-            fig2d.patch.set_facecolor(bg_color)
-            ax.set_facecolor(bg_color)
-            ax.scatter(X[:, 0], X[:, 1], c=y, cmap="bwr", edgecolors="w", s=40)
-            ax.set_title(f"{dataset_en_name(dataset)} (2D)", fontsize=14, fontweight="bold", color="white")
-            ax.set_xlabel("Feature 1", color="white")
-            ax.set_ylabel("Feature 2", color="white")
-            ax.tick_params(colors="white")
-            for spine in ax.spines.values():
-                spine.set_color("white")
-            ax.grid(True, alpha=0.15, color="white")
-        st.pyplot(fig2d)
-        plt.close()
+        fig2d, ax = plt.subplots(figsize=(6, 5), facecolor=bg_color)
+        ax.set_facecolor(bg_color)
+        ax.scatter(X[:, 0], X[:, 1], c=y, cmap="bwr", edgecolors="w", s=40)
+        ax.set_title(f"{dataset_en_name(dataset)} (2D)", fontsize=14, fontweight="bold", color="white")
+        ax.set_xlabel("Feature 1", color="white")
+        ax.set_ylabel("Feature 2", color="white")
+        ax.tick_params(colors="white")
+        for spine in ax.spines.values():
+            spine.set_color("white")
+            spine.set_linewidth(0.5)
+        ax.grid(True, alpha=0.12, color="white", linewidth=0.5)
+        fig2d.tight_layout()
+        buf = io.BytesIO()
+        fig2d.savefig(buf, format="png", dpi=150, facecolor=bg_color, bbox_inches="tight")
+        buf.seek(0)
+        st.image(buf, use_container_width=True)
+        plt.close("all")
 
     with col_right:
         st.markdown(f"### {T('demo_3d_title')}")
