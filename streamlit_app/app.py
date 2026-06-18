@@ -416,6 +416,119 @@ def plotly_3d_kernel_mapping(X, y, gamma_val, kernel="rbf"):
     return fig
 
 
+def plotly_kernel_lift_animation(X, y, kernel, z_target):
+    n_frames = 30
+    colors = {0: "blue", 1: "red"}
+
+    x_pad = (X[:, 0].max() - X[:, 0].min()) * 0.15
+    y_pad = (X[:, 1].max() - X[:, 1].min()) * 0.15
+    xs = np.linspace(X[:, 0].min() - x_pad, X[:, 0].max() + x_pad, 25)
+    ys = np.linspace(X[:, 1].min() - y_pad, X[:, 1].max() + y_pad, 25)
+    xx, yy = np.meshgrid(xs, ys)
+    zz_surf = compute_kernel_z(np.column_stack([xx.ravel(), yy.ravel()]), kernel).reshape(xx.shape)
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Surface(
+        x=xx, y=yy, z=zz_surf,
+        colorscale=[[0, "#FF8C00"], [0.5, "#FFD700"], [1, "#FF8C00"]],
+        opacity=0.3, showscale=False, name="Kernel Surface",
+    ))
+
+    for class_id in [0, 1]:
+        mask = y == class_id
+        fig.add_trace(go.Scatter3d(
+            x=X[mask, 0], y=X[mask, 1], z=np.zeros(mask.sum()),
+            mode="markers",
+            marker=dict(size=5, color=colors[class_id], opacity=0.9,
+                        line=dict(width=0.5, color="black")),
+            name=f"Class {'A' if class_id == 0 else 'B'}",
+        ))
+
+    z_mean = z_target.mean()
+    zz_plane = np.full_like(xx, z_mean)
+    fig.add_trace(go.Surface(
+        x=xx, y=yy, z=zz_plane,
+        colorscale=[[0, "green"], [1, "green"]],
+        opacity=0.15, showscale=False, name="Hyperplane",
+    ))
+
+    formula = kernel_formula_str(kernel)
+    frames = []
+    cam_start = dict(eye=dict(x=0.01, y=0.01, z=2.5))
+    cam_end = dict(eye=dict(x=1.8, y=1.8, z=0.8))
+
+    for i in range(n_frames):
+        t = i / (n_frames - 1)
+        t_smooth = t * t * (3 - 2 * t)
+        eye_x = cam_start["eye"]["x"] + (cam_end["eye"]["x"] - cam_start["eye"]["x"]) * t_smooth
+        eye_y = cam_start["eye"]["y"] + (cam_end["eye"]["y"] - cam_start["eye"]["y"]) * t_smooth
+        eye_z = cam_start["eye"]["z"] + (cam_end["eye"]["z"] - cam_start["eye"]["z"]) * t_smooth
+
+        z_anim = z_target * t_smooth
+        idx = 0
+        data = []
+        data.append(dict(type="surface", x=xx, y=yy, z=zz_surf,
+                         colorscale=[[0, "#FF8C00"], [0.5, "#FFD700"], [1, "#FF8C00"]],
+                         opacity=0.3, showscale=False))
+        for class_id in [0, 1]:
+            mask = y == class_id
+            data.append(dict(type="scatter3d",
+                             x=X[mask, 0], y=X[mask, 1], z=z_anim[mask],
+                             mode="markers",
+                             marker=dict(size=5, color=colors[class_id], opacity=0.9,
+                                        line=dict(width=0.5, color="black")),
+                             name=f"Class {'A' if class_id == 0 else 'B'}"))
+        data.append(dict(type="surface", x=xx, y=yy, z=zz_plane,
+                         colorscale=[[0, "green"], [1, "green"]],
+                         opacity=0.15, showscale=False))
+
+        frames.append(go.Frame(
+            data=data,
+            layout=dict(scene=dict(camera=dict(eye=dict(x=eye_x, y=eye_y, z=eye_z)))),
+            name=f"frame{i}",
+        ))
+
+    fig.frames = frames
+    fig.update_layout(
+        title=f"2D → 3D Lift: {formula}",
+        scene=dict(
+            xaxis_title="X", yaxis_title="Y", zaxis_title="Z",
+            camera=dict(eye=dict(x=0.01, y=0.01, z=2.5)),
+        ),
+        height=500,
+        margin=dict(l=0, r=0, t=40, b=0),
+        updatemenus=[dict(
+            type="buttons",
+            showactive=False,
+            x=0.5, y=-0.05, xanchor="center",
+            buttons=[dict(
+                label="Play",
+                method="animate",
+                args=[None, dict(frame=dict(duration=80, redraw=True),
+                                 fromcurrent=True, transition=dict(duration=0))],
+            ), dict(
+                label="Reset",
+                method="animate",
+                args=[[None], dict(frame=dict(duration=0, redraw=True),
+                                   fromcurrent=True, transition=dict(duration=0))],
+            )],
+        )],
+        sliders=[dict(
+            active=0,
+            x=0.5, y=-0.12, xanchor="center", len=0.8,
+            steps=[dict(
+                method="animate",
+                args=[[f"frame{i}"],
+                      dict(mode="immediate", frame=dict(duration=0, redraw=True),
+                           transition=dict(duration=0))],
+                label=f"{i*100//(n_frames-1)}%",
+            ) for i in range(0, n_frames, 3)],
+        )],
+    )
+    return fig
+
+
 def plot_decision_boundary(model, X, y, scaler, title, ax):
     X_scaled = scaler.transform(X)
     x_min, x_max = X_scaled[:, 0].min() - 0.5, X_scaled[:, 0].max() + 0.5
@@ -587,6 +700,10 @@ def page_3d_kernel_demo():
     </ul>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("### 2D → 3D Lift Animation")
+    fig_anim = plotly_kernel_lift_animation(X, y, kernel, z)
+    st.plotly_chart(fig_anim, use_container_width=True)
 
 
 def page_svm_concepts():
