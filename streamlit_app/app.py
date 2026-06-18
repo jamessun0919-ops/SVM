@@ -691,15 +691,18 @@ def page_3d_kernel_demo():
     with col_right:
         st.markdown(f"### {T('demo_3d_title')}")
         fig = plotly_3d_kernel_mapping(X, y, gamma, kernel)
-        fig.update_layout(paper_bgcolor=bg_color, scene=dict(bgcolor=bg_color))
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(paper_bgcolor=bg_color)
+        fig.update_scenes(bgcolor=bg_color)
+        chart_key = f"3d_{dataset}_{kernel}_{n_samples}_{noise}"
+        st.plotly_chart(fig, use_container_width=True, key=chart_key)
 
     z = compute_kernel_z(X, kernel)
     formula = kernel_formula_str(kernel)
 
     st.markdown("### 2D → 3D Lift Animation")
     fig_anim = plotly_kernel_lift_animation(X, y, kernel, z)
-    st.plotly_chart(fig_anim, use_container_width=True)
+    anim_key = f"anim_{dataset}_{kernel}_{n_samples}_{noise}"
+    st.plotly_chart(fig_anim, use_container_width=True, key=anim_key)
 
     st.markdown(f"""
     <div class="card">
