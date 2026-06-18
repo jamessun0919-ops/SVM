@@ -668,6 +668,11 @@ def page_3d_kernel_demo():
     if dataset in ("Iris", "鳶尾花"):
         y = (y > 0).astype(int)
 
+    st.text(f"Dataset: {dataset} | Kernel: {kernel} | Samples: {n_samples}")
+    st.text(f"X range: {X[:,0].min():.2f}-{X[:,0].max():.2f}, {X[:,1].min():.2f}-{X[:,1].max():.2f}")
+    z_check = compute_kernel_z(X, kernel)
+    st.text(f"z range: {z_check.min():.2f}-{z_check.max():.2f}, z_mean: {z_check.mean():.2f}")
+
     bg_color = "#1a1a2e"
     col_left, col_right = st.columns(2)
     with col_left:
