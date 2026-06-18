@@ -319,6 +319,12 @@ st.markdown(T("subtitle"))
 SIDEBAR_HEADER = T("sidebar_header")
 
 
+def dataset_en_name(name):
+    mapping = {"Circles": "Circles", "\u540c\u5fc3\u5713": "Circles",
+               "Moons": "Moons", "\u534a\u6708\u5f62": "Moons",
+               "Iris": "Iris", "\u9ce9\u5c3e\u82b1": "Iris"}
+    return mapping.get(name, name)
+
 def generate_dataset(name, n_samples, noise, random_state=42):
     if name in ("Circles", "同心圓"):
         X, y = make_circles(n_samples=n_samples, noise=noise,
@@ -517,7 +523,7 @@ def page_3d_kernel_demo():
         st.markdown(f"### {T('demo_2d_title')}")
         fig2d, ax = plt.subplots(figsize=(6, 5))
         ax.scatter(X[:, 0], X[:, 1], c=y, cmap="bwr", edgecolors="k", s=40)
-        ax.set_title(f"{dataset} (2D)", fontsize=14, fontweight="bold")
+        ax.set_title(f"{dataset_en_name(dataset)} (2D)", fontsize=14, fontweight="bold")
         ax.set_xlabel("Feature 1")
         ax.set_ylabel("Feature 2")
         st.pyplot(fig2d)
@@ -658,7 +664,7 @@ def page_model_training():
     with col1:
         fig, ax = plt.subplots(figsize=(10, 6))
         plot_decision_boundary(model, X_train, y_train, scaler,
-                               f"SVM ({kernel}) on {dataset}", ax)
+                               f"SVM ({kernel}) on {dataset_en_name(dataset)}", ax)
         st.pyplot(fig)
         plt.close()
 
