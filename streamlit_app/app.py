@@ -341,12 +341,30 @@ def generate_dataset(name, n_samples, noise, random_state=42):
     return X, y
 
 
-def compute_z_mapping(X):
-    return X[:, 0] ** 2 + X[:, 1] ** 2
+def compute_kernel_z(X, kernel):
+    x, y = X[:, 0], X[:, 1]
+    if kernel == "linear":
+        return x + y
+    elif kernel == "poly":
+        return x**2 + x * y + y**2
+    elif kernel == "sigmoid":
+        return np.tanh(x + y)
+    else:
+        return x**2 + y**2
 
 
-def plotly_3d_kernel_mapping(X, y, gamma_val):
-    z = compute_z_mapping(X)
+def kernel_formula_str(kernel):
+    mapping = {
+        "rbf": "z = x\u00b2 + y\u00b2",
+        "linear": "z = x + y",
+        "poly": "z = x\u00b2 + xy + y\u00b2",
+        "sigmoid": "z = tanh(x + y)",
+    }
+    return mapping.get(kernel, "z = x\u00b2 + y\u00b2")
+
+
+def plotly_3d_kernel_mapping(X, y, gamma_val, kernel="rbf"):
+    z = compute_kernel_z(X, kernel)
     fig = go.Figure()
     colors = {0: "blue", 1: "red"}
     for class_id in [0, 1]:
@@ -361,15 +379,18 @@ def plotly_3d_kernel_mapping(X, y, gamma_val):
     x_range = np.linspace(X[:, 0].min(), X[:, 0].max(), 20)
     y_range = np.linspace(X[:, 1].min(), X[:, 1].max(), 20)
     xx, yy = np.meshgrid(x_range, y_range)
-    zz = np.full_like(xx, 0.35)
+
+    z_mean = z.mean()
+    zz = np.full_like(xx, z_mean)
     fig.add_trace(go.Surface(
         x=xx, y=yy, z=zz,
         colorscale=[[0, "green"], [1, "green"]],
         opacity=0.2, showscale=False, name="Hyperplane",
     ))
 
+    formula = kernel_formula_str(kernel)
     fig.update_layout(
-        title=f"Kernel Mapping: z = x\u00b2 + y\u00b2 (\u03b3 = {gamma_val})",
+        title=f"Kernel Mapping: {formula} (\u03b3 = {gamma_val})",
         scene=dict(
             xaxis_title="X", yaxis_title="Y", zaxis_title="Z",
             camera=dict(eye=dict(x=1.5, y=1.5, z=0.8)),
@@ -515,7 +536,7 @@ def page_3d_kernel_demo():
     if dataset in ("Iris", "鳶尾花"):
         y = (y > 0).astype(int)
 
-    fig = plotly_3d_kernel_mapping(X, y, gamma)
+    fig = plotly_3d_kernel_mapping(X, y, gamma, kernel)
     st.plotly_chart(fig, use_container_width=True)
 
     col1, col2 = st.columns(2)
@@ -530,11 +551,12 @@ def page_3d_kernel_demo():
         plt.close()
 
     with col2:
-        z = compute_z_mapping(X)
+        z = compute_kernel_z(X, kernel)
+        formula = kernel_formula_str(kernel)
         st.markdown(f"### {T('demo_3d_title')}")
         st.markdown(f"""
         <div class="card">
-        <b>z = x\u00b2 + y\u00b2</b><br>
+        <b>{formula}</b><br>
         {T("demo_3d_desc")}
         </div>
         """, unsafe_allow_html=True)
