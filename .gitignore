@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+output/
+ml_implementation/figures/
+*.mp4
+*.gif
+*.png
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.local
